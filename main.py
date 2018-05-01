@@ -1,18 +1,35 @@
+#Import the necessary Python moduless
 import pandas as pd
 import geopandas as gpd
 import numpy as np
-import matplotlib.pyplot as plt
+from geopandas.tools import sjoin
+import folium
+from folium.plugins import MarkerCluster
+from folium.element import IFrame
+import shapely
+from shapely.geometry import Point
+import unicodedata
+import pysal as ps
 from shapely import geometry
-import seaborn as sns
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
-try:
-    import pycpt
-    cmap = pycpt.load.cmap_from_cptcity_url('ukmo/wow/temp-c.cpt')
-except:
-    cmap = 'Spectral_r'
+#Read data
+column_names = 'id;'.split(";")
 
-mag_data = pd.read_csv('./data/processed/mag.csv', index_col=0)
-mag_data['geometry'] = [geometry.Point(x, y) for x, y in zip(mag_data['long_wgs84'], mag_data['lat_wgs84'])]
-mag_data = gpd.GeoDataFrame(mag_data, geometry='geometry', crs="+init=epsg:4326")
+all_data = pd.read_csv('./data/processed_data.csv',sep=",")
 
-mag_data.head()
+
+
+locations = all_data[['latitude', 'longitude']]
+locationlist = locations.values.tolist()
+len(locationlist)
+locationlist[7]
+
+map2 = folium.Map(location=[0, -77.05], zoom_start=12)
+for point in range(0, len(locationlist)):
+    folium.Marker(locationlist[point], popup=all_data['address'][point]).add_to(map)
+map2
+
+
