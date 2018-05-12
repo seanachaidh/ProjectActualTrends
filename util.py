@@ -47,3 +47,34 @@ def kmToDIST(x):
 
 def geo_to_cartesian(lats,lons):
     return zip(*map(to_Cartesian, lats, lons))
+
+def isParetoDominated2(x,y):
+
+    #Better in one objective
+
+
+    dominated = False
+
+
+    for i in range(len(x)):
+        if x[i] > y[i] :
+            dominated = True
+        elif x[i] > y[i]:
+            return False
+    return dominated
+
+def isParetoDominated(x,y):
+
+    #Better in one objective
+    dominated = True
+    for i in range(len(x)):
+        if x[i] < y[i]:
+            dominated = False
+
+
+
+    return dominated
+
+print(isParetoDominated([1,2],[5,1]))
+print(isParetoDominated([1,2],[4,6]))
+print(isParetoDominated([4,6],[1,2]))
