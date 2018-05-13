@@ -1,11 +1,12 @@
 from graph import Graph
 from weights import Weights
+import random
 import heapq
 import collections
 import functools
 import numpy as np
 from collections import deque
-from util import isParetoDominated
+from util import dominates
 
 def is_pareto_efficient(costs):
     """
@@ -29,7 +30,7 @@ def multi_objective_dijkstra(graph, initial,final):
   #Initialize label of initial node
 
 
- 
+  
   originLabel = [[0,0],None,None]
 
   #graph.get_node(initial).add_temp_label(originLabel)
@@ -42,12 +43,15 @@ def multi_objective_dijkstra(graph, initial,final):
   lexicographicalOrder = {initial : 0}
 
   it=0
-  while tempLabels and it < 8:
+  while tempLabels and it < 10:
 
     
     #Find the lowest node according to a lexicographical order in the temporary set
-    source = min(lexicographicalOrder, key=lexicographicalOrder.get)
-    print("Node",source,lexicographicalOrder)
+    source = max(lexicographicalOrder, key=lexicographicalOrder.get)
+    #r = random.randint(0,len(lexicographicalOrder))
+
+  
+    print("Node",source)
     #print(tempLabels)
 
     currentLabel = tempLabels[source]
@@ -55,22 +59,29 @@ def multi_objective_dijkstra(graph, initial,final):
   
 
     #Move label from temporal to perm and remove = make final ! 
-    h = currentNode.add_perm_label(currentLabel)
+    currentNode.add_perm_label(currentLabel)
+    h = 0
+    if len(currentNode.permLabels) > 0 :
+      h = currentNode.permLabels.index(currentLabel)
+
+   
     del lexicographicalOrder[source]
     del tempLabels[source]
     #print("temp",tempLabels)
 
     #Mark all the neighbors of the currentNode
     for neighbor in graph.edges[source]:
-      
+     
       neighborNode = graph.get_node(neighbor)
  
       #Get transition rewards
       distance, pollution = graph.get_rewards(source, neighbor)
+
       sourceDistance, sourcePollution = currentNode.permLabels[h][0]
       newReward = [sourceDistance+distance,sourcePollution+pollution]
       newLabel = [newReward,source,h]
       dominatedNodes = []
+     
       
 
       #Determine if the solution is optimal by the temporary archive
@@ -79,8 +90,8 @@ def multi_objective_dijkstra(graph, initial,final):
       for label in tempLabels:
         target = tempLabels[label][0]
         #print("neighbor",neighbor,newReward,target,isParetoDominated(newReward,target))
-      #  if isParetoDominated(newReward,target) :
-      #    dominatedNodes.append(label)
+        #if dominates(newReward,target) :
+          #dominatedNodes.append(label)
       
       dominated = len(dominatedNodes) > 0
       #print("neighbor",neighbor,newReward,dominated)
@@ -91,8 +102,8 @@ def multi_objective_dijkstra(graph, initial,final):
      
       
       #Determine dominance in permant archive of node
-      for label in neighborNode.permLabels:
-        target = neighborNode.permLabels[0]
+      #for label in neighborNode.permLabels:
+        #target = neighborNode.permLabels[0]
         #dominated = isParetoDominated(newReward,label[0])
         #if dominated:
           #break
@@ -102,7 +113,16 @@ def multi_objective_dijkstra(graph, initial,final):
         tempLabels[neighbor] = newLabel
         lexicographicalOrder[neighbor] = newLabel[0][0]
         neighborNode.add_perm_label(newLabel)
-        print("adding",neighbor,newLabel,tempLabels)
+        dom = []
+        #print("neighbor",neighbor,neighborNode.permLabels)
+        #for label in tempLabels:
+          #print("label",newReward,tempLabels[label][0],dominates(newReward,tempLabels[label][0]))
+          #if dominates(newReward,tempLabels[label][0]):
+           # dom.append(label)
+        #for domi in dom:
+        #  del lexicographicalOrder[domi]
+        #  del tempLabels[domi]
+        #print("adding",neighbor,newLabel,tempLabels)
 
       #Delete all the temporary labels dominated by label
       #for dom in dominatedNodes:
@@ -184,7 +204,13 @@ def dijkstra(graph, initial):
   return visited, path
 
 g = Graph()
-g.add_nodes([i for i in range(6)])
+g.add_node(0,[1,2])
+g.add_node(1,[2,3])
+g.add_node(2,[1,2])
+g.add_node(3,[1,2])
+g.add_node(4,[1,2])
+g.add_node(5,[1,2])
+print(g.find_node([2,3]))
 g.add_edge(0, 1, 1,2)
 g.add_edge(0, 2, 5,1)
 g.add_edge(0, 3, 4,6)
@@ -197,4 +223,30 @@ g.add_edge(3, 5, 2,7)
 g.add_edge(4, 5, 3,6)
 
 multi_objective_dijkstra(g,0,4)
+print("\n")
+def backpropagateroutes(graph, initial,final):
+  routes = []
+  initial_node = g.get_node(final)
+  
+  for current_node in initial_node.permLabels:
+    a=[initial_node.nr]
+    previous_node = current_node[1]
+    h = current_node[2]
+    #print("initial",initial_node.nr)
+    #print("current",previous_node)
+    a.append(previous_node)
+    while previous_node != initial :
+      neighbor = g.get_node(previous_node)
+      previous_node = neighbor.permLabels[h][1]
+      #print("next",previous_node)
+      h = neighbor.permLabels[h][2]
+      a.append(previous_node)
+    print(a[::-1])
+    routes.append(a[::-1])
+  return routes
+
+  #print("initial node",initial_node.permLabels)
+backpropagateroutes(g, 0, 5)
+#Extract paths
+
 

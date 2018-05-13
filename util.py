@@ -63,18 +63,26 @@ def isParetoDominated2(x,y):
             return False
     return dominated
 
-def isParetoDominated(x,y):
+def dominates(x,y):
 
     #Better in one objective
-    dominated = True
+    strict = False
     for i in range(len(x)):
+        if x[i] > y[i]:
+            return False
         if x[i] < y[i]:
-            dominated = False
+            strict = True
+    return strict
 
 
 
-    return dominated
+   
 
-print(isParetoDominated([1,2],[5,1]))
-print(isParetoDominated([1,2],[4,6]))
-print(isParetoDominated([4,6],[1,2]))
+
+
+
+
+
+#print(isParetoDominated([1,2],[5,1]))
+#print(isParetoDominated([1,2],[4,6]))
+#print(isParetoDominated([4,6],[1,2]))

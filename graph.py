@@ -4,11 +4,13 @@ from weights import Weights
 import numpy as np
 
 class Node:
-   def __init__(self,nr,initial=None):
+   def __init__(self,nr,coordinates,initial=None):
     self.nr = nr
     self.tempLabels = []
     self.permLabels = []
     self.previousReward = initial
+    self.coordinates = coordinates
+
 
    def add_temp_label(self,label):
     """
@@ -22,13 +24,10 @@ class Node:
     """
     Add a label to the permanent list of vectorial rewards and return the position
     """
-    for l in self.permLabels:
-        print(l[1],label[1])
-        if label[1] == l[1]:
-            return len(self.permLabels)-1
     if label not in self.permLabels:
         self.permLabels.append(label)
-    return len(self.permLabels) - 1
+
+
 
 
 
@@ -50,6 +49,16 @@ class Graph:
   def add_nodes(self, value):
       for i in value:
           self.nodes.append(Node(i))
+
+  def add_node(self,value,coordinates):
+      self.nodes.append(Node(value,coordinates))
+  #TODO : Nodes should be stored in a dictionary according to the geocoordinates
+  def find_node(self,coordinates):
+    for node in self.nodes:
+      if node.coordinates == coordinates:
+        return node.nr
+    return -1
+
 
   def add_edge(self, from_node, to_node, distance,pollution):
     self.edges[from_node].append(to_node)
