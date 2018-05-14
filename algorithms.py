@@ -43,11 +43,11 @@ def multi_objective_dijkstra(graph, initial,final):
   lexicographicalOrder = {initial : 0}
 
   it=0
-  while tempLabels and it < 10:
+  while tempLabels:
 
     
     #Find the lowest node according to a lexicographical order in the temporary set
-    source = max(lexicographicalOrder, key=lexicographicalOrder.get)
+    source = min(lexicographicalOrder, key=lexicographicalOrder.get)
     #r = random.randint(0,len(lexicographicalOrder))
 
   
@@ -134,7 +134,7 @@ def multi_objective_dijkstra(graph, initial,final):
     it += 1
     #print("after",tempLabels)
     #Remove current from temporary labels
-  print("\n")
+  #print("\n")
   for node in range(len(graph.nodes)):
     print("node",node," ",graph.nodes[node].permLabels)
       #tempLabels[neighborNode.nr] = newLabel
@@ -216,37 +216,44 @@ g.add_edge(0, 2, 5,1)
 g.add_edge(0, 3, 4,6)
 g.add_edge(1, 3, 2,3)
 g.add_edge(1, 2, 3,2)
+g.add_edge(2, 1, 3,2)
 g.add_edge(1, 4, 2,4)
 g.add_edge(2, 5, 1,8)
 g.add_edge(2, 4, 2,2)
 g.add_edge(3, 5, 2,7)
 g.add_edge(4, 5, 3,6)
-
-multi_objective_dijkstra(g,0,4)
+g.add_edge(5, 4, 3,6)
+g.add_edge(0, 5, 3,6)
+multi_objective_dijkstra(g,0,0)
 print("\n")
 def backpropagateroutes(graph, initial,final):
   routes = []
-  initial_node = g.get_node(final)
+  initial_node = graph.get_node(final)
   
   for current_node in initial_node.permLabels:
     a=[initial_node.nr]
     previous_node = current_node[1]
     h = current_node[2]
-    #print("initial",initial_node.nr)
+    print("initial",initial_node.nr)
     #print("current",previous_node)
     a.append(previous_node)
-    while previous_node != initial :
-      neighbor = g.get_node(previous_node)
+    while previous_node != initial and previous_node != None :
+      neighbor = graph.get_node(previous_node)
       previous_node = neighbor.permLabels[h][1]
-      #print("next",previous_node)
+      print("next",previous_node)
       h = neighbor.permLabels[h][2]
       a.append(previous_node)
-    print(a[::-1])
-    routes.append(a[::-1])
+    #print(a[::-1])
+    
+    if previous_node != None:
+      routes.append(a[::-1])
+      #break
+    print("\n")
   return routes
 
   #print("initial node",initial_node.permLabels)
-backpropagateroutes(g, 0, 5)
+routes = backpropagateroutes(g, 0, 5)
+print(len(routes))
 #Extract paths
 
 
