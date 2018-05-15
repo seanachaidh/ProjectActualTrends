@@ -77,6 +77,7 @@ class Graph:
   def get_rewards(self,from_node,to_node):
     return self.objectives[(from_node, to_node)]
 
+
   def get_distance(self,from_node,to_node):
     return self.objectives[(from_node, to_node)][0] 
 

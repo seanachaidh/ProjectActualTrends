@@ -7,6 +7,7 @@ import functools
 import numpy as np
 from collections import deque
 from util import dominates
+import route
 
 def is_pareto_efficient(costs):
     """
@@ -38,12 +39,12 @@ def multi_objective_dijkstra(graph, initial,final):
 
 
   tempLabels = {initial : originLabel}
-
+  visited = {initial: 0}
   #Lexicographical order corresponds to the lowest first objectives
   lexicographicalOrder = {initial : 0}
 
   it=0
-  while tempLabels:
+  while tempLabels and it < 100:
 
     
     #Find the lowest node according to a lexicographical order in the temporary set
@@ -90,8 +91,8 @@ def multi_objective_dijkstra(graph, initial,final):
       for label in tempLabels:
         target = tempLabels[label][0]
         #print("neighbor",neighbor,newReward,target,isParetoDominated(newReward,target))
-        #if dominates(newReward,target) :
-          #dominatedNodes.append(label)
+        if dominates(newReward,target) :
+          dominatedNodes.append(label)
       
       dominated = len(dominatedNodes) > 0
       #print("neighbor",neighbor,newReward,dominated)
@@ -102,9 +103,9 @@ def multi_objective_dijkstra(graph, initial,final):
      
       
       #Determine dominance in permant archive of node
-      #for label in neighborNode.permLabels:
-        #target = neighborNode.permLabels[0]
-        #dominated = isParetoDominated(newReward,label[0])
+      for label in neighborNode.permLabels:
+        target = neighborNode.permLabels[0]
+        dominated = dominates(newReward,label[0])
         #if dominated:
           #break
       
@@ -125,10 +126,10 @@ def multi_objective_dijkstra(graph, initial,final):
         #print("adding",neighbor,newLabel,tempLabels)
 
       #Delete all the temporary labels dominated by label
-      #for dom in dominatedNodes:
-        #print("dom",dom,tempLabels)
-        #del lexicographicalOrder[dom]
-        #del tempLabels[dom]
+      for dom in dominatedNodes:
+        print("dom",dom,tempLabels)
+        del lexicographicalOrder[dom]
+        del tempLabels[dom]
 
 
     it += 1
@@ -253,7 +254,9 @@ def backpropagateroutes(graph, initial,final):
 
   #print("initial node",initial_node.permLabels)
 routes = backpropagateroutes(g, 0, 5)
-print(len(routes))
+
+
+
 #Extract paths
 
 
