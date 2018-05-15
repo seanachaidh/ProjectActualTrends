@@ -1,15 +1,17 @@
 from collections import defaultdict
 from weights import Weights
-
+import pandas as pd
 import numpy as np
 
 class Node:
-   def __init__(self,nr,coordinates,initial=None):
+   def __init__(self,nr,x,y,pollution,initial=None):
     self.nr = nr
     self.tempLabels = []
     self.permLabels = []
     self.previousReward = initial
-    self.coordinates = coordinates
+    self.x = x
+    self.y = y
+
 
 
    def add_temp_label(self,label):
@@ -50,8 +52,8 @@ class Graph:
       for i in value:
           self.nodes.append(Node(i))
 
-  def add_node(self,value,coordinates):
-      self.nodes.append(Node(value,coordinates))
+  def add_node(self,value,x,y,pollution):
+      self.nodes.append(Node(value,x,y,pollution))
   #TODO : Nodes should be stored in a dictionary according to the geocoordinates
   def find_node(self,coordinates):
     for node in self.nodes:
@@ -104,4 +106,14 @@ class Graph:
                 break
 
     return archive1
+
+#Read data
+nodes = pd.read_csv('./data/nodes_dataset.csv', encoding='cp1252',sep=",")
+
+for i in range(len(nodes)):
+  x=nodes['x'][i]
+  y=nodes['y'][i]
+  n=nodes['node'][i]
+  pm=nodes['pm'][i]
+
     

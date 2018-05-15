@@ -182,8 +182,6 @@ def distance_duration(origin, destination = None, mode = 'walking'):
         result = _fetch('directions', args)
         # You can extract other useful informations here, such as duration
         #print(result['routes'][0])
-        for key in result['routes'][0]:
-            print(key)
         distance = result['routes'][0]['legs'][0]['distance']['text']
         duration = result['routes'][0]['legs'][0]['duration']['text']
         #result = result['routes'][0]['overview_polyline']['points']

@@ -26,10 +26,10 @@ from openrouteservice import distance_matrix
 from geopandas import GeoDataFrame
 from shapely.geometry import Point
 from openrouteservice import geocoding
-from algorithms import multi_objective_dijkstra
+#from algorithms import multi_objective_dijkstra
 
 import re
-from route import name,path,distance_duration
+#from route import name,path,distance_duration
 
 
 #import osrm
@@ -46,37 +46,22 @@ clnt = client.Client(key=api_key)
 all_data = pd.read_csv('./data/processed_data.csv', encoding='cp1252',sep=",")
 
 #Convert geo-coordinates to cartesian
-all_data['x'], all_data['y'], all_data['z'] = geo_to_cartesian(all_data['long_wgs84'],all_data['lat_wgs84'])
+all_data['x'], all_data['y'], all_data['z'] = geo_to_cartesian(all_data['lat_wgs84'],all_data['long_wgs84'])
 
 stationArr = all_data[['lat_wgs84', 'long_wgs84']].as_matrix()
 
 
-#import geocoder
 
-#https://geopy.readthedocs.io/en/stable/
-#from geopy.geocoders import Nominatim
 ulb = [50.813724000000001,4.3842050000000006]
 
 north = [50.860652000000002, 4.3581160000000008]
 
 addresses=[]
+
+#TODO : Can use a reverse geo coder based on google to retrieve the station names (when working with new data)
 #Reverse geo code the address name
-#for i in range(len(all_data)):
-    #x = all_data['lat_wgs84'][i]
-    #y = all_data['long_wgs84'][i]
-    #print(path((50.813724000000001, 4.3581160000000008),(x, y)))
-    #print(name(x,y))
-    #print(x,y)
-    #geolocator = Nominatim()
-    #location = geolocator.reverse([x, y])
-    #address = all_data['address'][i]
-    #name = address.split('-')
-    #addresses.append(name[0].capitalize())
-    #g = geocoder.google([y,x], method='reverse')
-    #print(g.street)
-    #all_data['name'] = clnt.reverse_geocode(location=(x, y))['features'][0]['properties']['name']
+
     
-#all_data['name'] = addresses
 all_data.to_csv('./data/final_dataset.csv')
 #locationlist = zip(all_data['long_wgs84'],all_data['lat_wgs84'])
 locationlist = [[all_data['long_wgs84'][i],all_data['lat_wgs84'][i]] for i in range(len(all_data)) ]
@@ -127,7 +112,7 @@ map.add_children(pt_lyr)
 
 
 
-
+#Add the pollution of each
 max_amount = float(all_data['pm2.5'].max())
 map.add_child(plugins.HeatMap(stationArr,
                                  radius=15,
@@ -172,31 +157,32 @@ for source in range(len(all_data)):
     nodes_dataset.append([source,x,y,pm])
     #name = all_data['name'][source]
     print("Node : ",source,x,y,address)
-    x_ref, y_ref, z_ref = to_Cartesian(y,x)
+    x_ref, y_ref, z_ref = to_Cartesian(x,y)
     # get the cartesian distances from the 10 closest points
-    dist, ix = tree.query((x_ref, y_ref, z_ref), 4)
+    dist, ix = tree.query((x_ref, y_ref, z_ref), 10)
     nodes.append(source)
     graph.add_node(source,[x,y])
-    print("ix",ix)
+    #Find the node that is not yet going to another node 
+    print("ix",ix,dist)
     #Add neighbors to graph
     for index in ix:
         if index != source:
             x_target = coord[index][0]
             y_target = coord[index][1]
-            distance, duration = distance_duration((x,y),(x_target,y_target))
+            #distance, duration = distance_duration((x,y),(x_target,y_target))
             address=all_data['address'][index].split('-')[0].capitalize()
             pm_target=all_data['pm2.5'][index]
             #pm_target=all_data['pm2.5'][index]
             #pm_target=all_data.loc[[index]]['pm2.5']
-            print("address",address,"source",source,"target",index,"distance",distance,"pm",pm_target)
-            graph.add_edge(source,index,distance,pm_target)
+            #print("address",address,"source",source,"target",index,"distance",distance,"pm",pm_target)
+            #graph.add_edge(source,index,distance,pm_target)
             #folium.PolyLine([[x, y], [x_target, y_target]]).add_to(map)
             #print("target",[x,y], [x_target, y_target])
-            edges_dataset.append([source,index,distance,duration,pm_target])
+            #edges_dataset.append([source,index,distance,duration,pm_target])
             
-df = pd.DataFrame(test,columns=['node','x','y','pm'],index=None)
+df = pd.DataFrame(nodes_dataset,columns=['node','x','y','pm'],index=None)
 df.to_csv('./data/nodes_dataset.csv',index=None)
-df = pd.DataFrame(test,columns=['source','target','distance','pm'],index=None)
+df = pd.DataFrame(edges_dataset,columns=['source','target','distance','pm'],index=None)
 df.to_csv('./data/edges_dataset.csv',index=None)
 
 
@@ -235,10 +221,7 @@ cemitiere_coord = tuple(graph.nodes[cemitiere].coordinates)
 ulb_coord = tuple(graph.nodes[ulb].coordinates)
 
 
-#etterbeek -> jaargetijden ->  petite suise -> ulb
-#etterbeek -> Cimetiere d'ixelles -> ulb
-#etterbeek -> petit suide -> ulb
-
+#FIND THE ROUTES AND ADD THEM TO MAP
 folium.PolyLine(path([etterbeek_coord,jaargetijden_coord])).add_to(map)
 folium.PolyLine(path([jaargetijden_coord,petite_suide_coord])).add_to(map)
 folium.PolyLine(path([petite_suide_coord,ulb_coord])).add_to(map)
