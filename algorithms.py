@@ -20,7 +20,7 @@ def is_pareto_efficient(costs):
             is_efficient[is_efficient] = np.any(costs[is_efficient]<=c, axis=1)  # Remove dominated points
     return is_efficient
 
-def multi_objective_dijkstra(graph, initial,final):
+def multi_objective_dijkstra(graph, initial,target):
   #Visited nodes and distances so far
   visited = {initial:(0,0)}
   paretoFront = {(0,0) : (0,0)}
@@ -44,11 +44,13 @@ def multi_objective_dijkstra(graph, initial,final):
   lexicographicalOrder = {initial : 0}
 
   it=0
+  visited = {initial : 0}
   while tempLabels and it < 100:
 
     
     #Find the lowest node according to a lexicographical order in the temporary set
     source = min(lexicographicalOrder, key=lexicographicalOrder.get)
+    
     #r = random.randint(0,len(lexicographicalOrder))
 
   
@@ -70,20 +72,20 @@ def multi_objective_dijkstra(graph, initial,final):
     del tempLabels[source]
     #print("temp",tempLabels)
 
+
     #Mark all the neighbors of the currentNode
     for neighbor in graph.edges[source]:
      
       neighborNode = graph.get_node(neighbor)
  
       #Get transition rewards
-      distance, pollution = graph.get_rewards(source, neighbor)
+      distance,duration, pollution = graph.get_rewards(source, neighbor)
 
       sourceDistance, sourcePollution = currentNode.permLabels[h][0]
       newReward = [sourceDistance+distance,sourcePollution+pollution]
       newLabel = [newReward,source,h]
       dominatedNodes = []
-     
-      
+
 
       #Determine if the solution is optimal by the temporary archive
       dominated = False
@@ -96,7 +98,6 @@ def multi_objective_dijkstra(graph, initial,final):
       
       dominated = len(dominatedNodes) > 0
       #print("neighbor",neighbor,newReward,dominated)
-
      
         
 
@@ -106,8 +107,8 @@ def multi_objective_dijkstra(graph, initial,final):
       for label in neighborNode.permLabels:
         target = neighborNode.permLabels[0]
         dominated = dominates(newReward,label[0])
-        #if dominated:
-          #break
+        if dominated:
+          break
       
       if not dominated:
         #Store the label of vertex as temporary
@@ -127,7 +128,6 @@ def multi_objective_dijkstra(graph, initial,final):
 
       #Delete all the temporary labels dominated by label
       for dom in dominatedNodes:
-        print("dom",dom,tempLabels)
         del lexicographicalOrder[dom]
         del tempLabels[dom]
 
@@ -136,8 +136,8 @@ def multi_objective_dijkstra(graph, initial,final):
     #print("after",tempLabels)
     #Remove current from temporary labels
   #print("\n")
-  for node in range(len(graph.nodes)):
-    print("node",node," ",graph.nodes[node].permLabels)
+  #for node in range(len(graph.nodes)):
+    #print("node",node," ",graph.nodes[node].permLabels)
       #tempLabels[neighborNode.nr] = newLabel
       #lexicographicalOrder[neighborNode.nr] = newReward[0]
 
@@ -204,29 +204,6 @@ def dijkstra(graph, initial):
 
   return visited, path
 
-g = Graph()
-g.add_node(0,[1,2])
-g.add_node(1,[2,3])
-g.add_node(2,[1,2])
-g.add_node(3,[1,2])
-g.add_node(4,[1,2])
-g.add_node(5,[1,2])
-print(g.find_node([2,3]))
-g.add_edge(0, 1, 1,2)
-g.add_edge(0, 2, 5,1)
-g.add_edge(0, 3, 4,6)
-g.add_edge(1, 3, 2,3)
-g.add_edge(1, 2, 3,2)
-g.add_edge(2, 1, 3,2)
-g.add_edge(1, 4, 2,4)
-g.add_edge(2, 5, 1,8)
-g.add_edge(2, 4, 2,2)
-g.add_edge(3, 5, 2,7)
-g.add_edge(4, 5, 3,6)
-g.add_edge(5, 4, 3,6)
-g.add_edge(0, 5, 3,6)
-multi_objective_dijkstra(g,0,0)
-print("\n")
 def backpropagateroutes(graph, initial,final):
   routes = []
   initial_node = graph.get_node(final)
@@ -252,6 +229,32 @@ def backpropagateroutes(graph, initial,final):
     print("\n")
   return routes
 
+"""
+g = Graph()
+g.add_node(0,[1,2])
+g.add_node(1,[2,3])
+g.add_node(2,[1,2])
+g.add_node(3,[1,2])
+g.add_node(4,[1,2])
+g.add_node(5,[1,2])
+print(g.find_node([2,3]))
+g.add_edge(0, 1, 1,2)
+g.add_edge(0, 2, 5,1)
+g.add_edge(0, 3, 4,6)
+g.add_edge(1, 3, 2,3)
+g.add_edge(1, 2, 3,2)
+g.add_edge(2, 1, 3,2)
+g.add_edge(1, 4, 2,4)
+g.add_edge(2, 5, 1,8)
+g.add_edge(2, 4, 2,2)
+g.add_edge(3, 5, 2,7)
+g.add_edge(4, 5, 3,6)
+g.add_edge(5, 4, 3,6)
+g.add_edge(0, 5, 3,6)
+multi_objective_dijkstra(g,0,0)
+print("\n")
+
+
   #print("initial node",initial_node.permLabels)
 routes = backpropagateroutes(g, 0, 5)
 
@@ -260,3 +263,4 @@ routes = backpropagateroutes(g, 0, 5)
 #Extract paths
 
 
+"""
