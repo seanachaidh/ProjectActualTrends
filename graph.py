@@ -62,18 +62,18 @@ class Graph:
     return -1
 
 
-  def add_edge(self, from_node, to_node, distance,pollution):
+  def add_edge(self, from_node, to_node, distance,duration,pollution):
     
     #self.edges[to_node].append(from_node) # dict to neighbour nodes
     if not (to_node,from_node) in self.objectives and not (from_node,to_node) in self.objectives:
       self.edges[from_node].append(to_node)
-      self.objectives[(from_node, to_node)] = [distance,pollution] # dict for distance
+      self.objectives[(from_node, to_node)] = [distance,duration,pollution] # dict for distance
     #self.objectives[(to_node, from_node)] = [distance,pollution]
 
   def add_edge_pareto(self, from_node, to_node, distance,pollution):
     self.edges[from_node].append(to_node)
     self.edges[to_node].append(from_node) # dict to neighbour nodes
-    self.objectives[(from_node, to_node)] = [distance,pollution] # dict for distance
+    self.objectives[(from_node, to_node)] = [distance,duration,pollution] # dict for distance
     #self.objectives[(to_node, from_node)] = [distance,pollution]
 
   def get_rewards(self,from_node,to_node):
@@ -108,12 +108,12 @@ class Graph:
     return archive1
 
 #Read data
-nodes = pd.read_csv('./data/nodes_dataset.csv', encoding='cp1252',sep=",")
+#nodes = pd.read_csv('./data/nodes_dataset.csv', encoding='cp1252',sep=",")
 
-for i in range(len(nodes)):
-  x=nodes['x'][i]
-  y=nodes['y'][i]
-  n=nodes['node'][i]
-  pm=nodes['pm'][i]
+#for i in range(len(nodes)):
+  #x=nodes['x'][i]
+  #y=nodes['y'][i]
+  #n=nodes['node'][i]
+  #pm=nodes['pm'][i]
 
     

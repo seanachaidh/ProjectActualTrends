@@ -76,6 +76,13 @@ def dominates(x,y):
 
 
 
+def append_to_2dlist(x,y):
+    if len(x) == 0:
+        return y
+    for i,row in enumerate(y):
+        for j,element in enumerate(row):
+            x[i].append(element)
+    return x
    
 
 
